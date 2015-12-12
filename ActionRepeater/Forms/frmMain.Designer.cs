@@ -1,4 +1,4 @@
-﻿namespace MacroRecorder
+﻿namespace ActionRepeater
 {
     partial class frmMain
     {
@@ -28,12 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.listEvents = new System.Windows.Forms.ListView();
             this.columnEventType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnData = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnAddNewEvent = new System.Windows.Forms.Button();
             this.btnInsertEvent = new System.Windows.Forms.Button();
             this.btnDeleteEvent = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.btnPlay = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.btnPlay)).BeginInit();
             this.SuspendLayout();
             // 
             // listEvents
@@ -71,15 +76,18 @@
             this.btnAddNewEvent.TabIndex = 1;
             this.btnAddNewEvent.Text = "Add Event";
             this.btnAddNewEvent.UseVisualStyleBackColor = true;
+            this.btnAddNewEvent.Click += new System.EventHandler(this.btnAddNewEvent_Click);
             // 
             // btnInsertEvent
             // 
+            this.btnInsertEvent.Enabled = false;
             this.btnInsertEvent.Location = new System.Drawing.Point(165, 634);
             this.btnInsertEvent.Name = "btnInsertEvent";
             this.btnInsertEvent.Size = new System.Drawing.Size(138, 46);
             this.btnInsertEvent.TabIndex = 2;
             this.btnInsertEvent.Text = "Insert Event above cursor";
             this.btnInsertEvent.UseVisualStyleBackColor = true;
+            this.btnInsertEvent.Click += new System.EventHandler(this.btnInsertEvent_Click);
             // 
             // btnDeleteEvent
             // 
@@ -91,17 +99,49 @@
             this.btnDeleteEvent.UseVisualStyleBackColor = true;
             this.btnDeleteEvent.Click += new System.EventHandler(this.btnDeleteEvent_Click);
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(227, 31);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 5;
+            this.button2.Text = "button2";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(321, 31);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 6;
+            this.button3.Text = "button3";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // btnPlay
+            // 
+            this.btnPlay.Image = ((System.Drawing.Image)(resources.GetObject("btnPlay.Image")));
+            this.btnPlay.Location = new System.Drawing.Point(31, 13);
+            this.btnPlay.Name = "btnPlay";
+            this.btnPlay.Size = new System.Drawing.Size(56, 56);
+            this.btnPlay.TabIndex = 7;
+            this.btnPlay.TabStop = false;
+            this.btnPlay.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(469, 693);
+            this.Controls.Add(this.btnPlay);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.btnDeleteEvent);
             this.Controls.Add(this.btnInsertEvent);
             this.Controls.Add(this.btnAddNewEvent);
             this.Controls.Add(this.listEvents);
             this.Name = "frmMain";
             this.Text = "ActionRepeater";
+            ((System.ComponentModel.ISupportInitialize)(this.btnPlay)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -114,6 +154,9 @@
         private System.Windows.Forms.Button btnAddNewEvent;
         private System.Windows.Forms.Button btnInsertEvent;
         private System.Windows.Forms.Button btnDeleteEvent;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.PictureBox btnPlay;
     }
 }
 

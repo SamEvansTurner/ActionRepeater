@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace MacroRecorder
+namespace ActionRepeater
 {
-    class ActionEvent
+    public class ActionEvent
     {
         public enum EventTypes
         {
@@ -90,6 +90,8 @@ namespace MacroRecorder
         {
             eventType = EventTypes.MouseMove;
             destination = dest;
+            destRand.X = randx;
+            destRand.Y = randy;
             mouseSpeed = mSpeed;
         }
 
@@ -98,6 +100,8 @@ namespace MacroRecorder
             eventType = EventTypes.MouseMove;
             destination.X = x;
             destination.Y = y;
+            destRand.X = randx;
+            destRand.Y = randy;
             mouseSpeed = mSpeed;
         }
 
