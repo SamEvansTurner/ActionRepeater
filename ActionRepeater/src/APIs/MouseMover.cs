@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Threading;
 
-namespace MacroRecorder
+namespace ActionRepeater
 {
     static class MouseMover
     {

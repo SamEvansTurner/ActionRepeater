@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace MacroRecorder
+namespace ActionRepeater
 {
     class ActionEventSeries
     {
@@ -50,46 +50,6 @@ namespace MacroRecorder
             }
         }
 
-        public void AddWait(int msToWait)
-        {
-            events.Add(new ActionEvent(msToWait));
-        }
-
-        public void InsertWait(int index, int msToWait)
-        {
-            events.Insert(index, new ActionEvent(msToWait));
-        }
-
-        public void AddKeysEvent(String keys)
-        {
-            events.Add(new ActionEvent(keys));
-        }
-
-        public void InsertKeysEvent(int index, String keys)
-        {
-            events.Insert(index, new ActionEvent(keys));
-        }
-
-        public void AddMouseMove(Point dest, Point rand)
-        {
-            events.Add(new ActionEvent(dest, rand.X, rand.Y, mSpeed));
-        }
-
-        public void InsertMouseMove(int index, Point dest, Point rand)
-        {
-            events.Insert(index, new ActionEvent(dest, rand.X, rand.Y, mSpeed));
-        }
-
-        public void AddMouseButton(ActionEvent.MouseButton mb)
-        {
-            events.Add(new ActionEvent(mb));
-        }
-
-        public void InsertMouseButton(int index, ActionEvent.MouseButton mb)
-        {
-            events.Insert(index, new ActionEvent(mb));
-        }
-
         public void ClearEvents()
         {
             events.Clear();
@@ -102,8 +62,17 @@ namespace MacroRecorder
 
         public ActionEvent GetEvent(int index)
         {
-            //return events[index];
-            return new ActionEvent(ActionEvent.MouseButton.Left);
+            return events[index];
+        }
+
+        public void InsertEvent(int index, ActionEvent ev)
+        {
+            events.Insert(index, ev);
+        }
+
+        public void AddEvent(ActionEvent ev)
+        {
+            events.Add(ev);
         }
 
         public void SaveToFile(String filename)
