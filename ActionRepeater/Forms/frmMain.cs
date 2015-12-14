@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,6 +15,8 @@ namespace ActionRepeater
 {
     public partial class frmMain : Form
     {
+        Thread playback;
+        KeyboardHook keyHook = new KeyboardHook();
 
         public enum AddTypes
         {
@@ -24,14 +27,39 @@ namespace ActionRepeater
         public frmMain()
         {
             InitializeComponent();
+
+            keyHook.KeyPressed += new EventHandler<KeyPressedEventArgs>(hook_KeyPressed);
+            keyHook.RegisterHotKey(ActionRepeater.Forms.ModifierKeys.None, Keys.F5);
             
+        }
+
+        void hook_KeyPressed(object sender, KeyPressedEventArgs e)
+        {
+            if (playback == null)
+            {
+                playback = new Thread(() => PlayActions());
+                playback.Start();
+            }
+            else
+            {
+                if (playback.ThreadState == ThreadState.Aborted || playback.ThreadState == ThreadState.Stopped)
+                {
+                    playback = new Thread(() => PlayActions());
+                    playback.Start();
+                }
+                else//if (playback.ThreadState == ThreadState.Running)
+                {
+                    playback.Abort();
+                }
+            }
         }
 
         private void ReloadEvents()
         {
+            listEvents.Items.Clear();
             for(int i = 0; i < ActionEventSeries.GetInstance().Events.Count; i++)
             {
-                AddEventToIndex(i, ActionEventSeries.GetInstance().GetEvent(i));
+                AddEventToListIndex(i, ActionEventSeries.GetInstance().GetEvent(i));
             }
         }
 
@@ -63,11 +91,22 @@ namespace ActionRepeater
             }
         }
 
+        private void PlayActions()
+        {
+            int nLoops = (int)numLoops.Value;
+            for (int i = nLoops; i > 0; i--)
+            {
+                ActionEventSeries.GetInstance().PlayEvents();
+            }
+
+        }
+
         private void DeleteEvent()
         {
             int index = listEvents.SelectedIndices[0];
 
             listEvents.Items.RemoveAt(index);
+            ActionEventSeries.GetInstance().RemoveEvent(index);
             listEvents.Focus();
 
             if (index >= listEvents.Items.Count)
@@ -130,22 +169,75 @@ namespace ActionRepeater
             }
         }
 
+        private void AddEventToListIndex(int index, ActionEvent ev)
+        {
+            ListViewItem li = new ListViewItem();
+            switch (ev.EventType)
+            {
+                case ActionEvent.EventTypes.Wait:
+                    {
+                        li.Text = "Wait " + ev.WaitTimeMS.ToString() + " ms";
+                        break;
+                    }
+                case ActionEvent.EventTypes.MouseMove:
+                    {
+                        if(ev.Relative)
+                        {
+                            li.Text = "Move Mouse " + ev.Destination.X + ", " + ev.Destination.Y + " plus a random " + ev.DestRand.X + ", " + ev.DestRand.Y + ", at a speed of " + ev.MouseSpeed + " from the current position";
+                        }
+                        else
+                        {
+                            li.Text = "Move Mouse to " + ev.Destination.X + ", " + ev.Destination.Y + " plus a random " + ev.DestRand.X + ", " + ev.DestRand.Y + ", at a speed of " + ev.MouseSpeed;
+                        }
+                        break;
+                    }
+                case ActionEvent.EventTypes.MouseButton:
+                    {
+                        switch (ev.MButton)
+                        {
+                            case ActionEvent.MouseButton.Left:
+                                {
+                                    li.Text = "Left Click";
+                                    break;
+                                }
+                            case ActionEvent.MouseButton.Right:
+                                {
+                                    li.Text = "Right Click";
+                                    break;
+                                }
+                        }
+                        break;
+                    }
+                case ActionEvent.EventTypes.Keys:
+                    {
+                        li.Text = "Send keys " + ev.Key;
+                        break;
+                    }
+            }
+            listEvents.Items.Insert(index, li);
+            listEvents.Columns[0].Width = -1;
+        }
+
         private void AddEventToIndex(int index, ActionEvent ev)
         {
             ListViewItem li = new ListViewItem();
-            li.Text = ev.EventType.ToString();
             switch (ev.EventType)
             {
                 case ActionEvent.EventTypes.Wait:
                 {
-                    li.Text = "Wait";
-                    li.SubItems.Add(ev.WaitTimeMS.ToString() + " ms");
+                    li.Text = "Wait " + ev.WaitTimeMS.ToString() + " ms";
                     break;
                 }
                 case ActionEvent.EventTypes.MouseMove:
                 {
-                    li.Text = "Move Mouse to";
-                    li.SubItems.Add(ev.Destination.X + ", " + ev.Destination.Y + " plus a random " + ev.DestRand.X + ", " + ev.DestRand.Y + ", at a speed of " + ev.MouseSpeed);
+                    if (ev.Relative)
+                    {
+                        li.Text = "Move Mouse " + ev.Destination.X + ", " + ev.Destination.Y + " plus a random " + ev.DestRand.X + ", " + ev.DestRand.Y + ", at a speed of " + ev.MouseSpeed + " from the current position";
+                    }
+                    else
+                    {
+                        li.Text = "Move Mouse to " + ev.Destination.X + ", " + ev.Destination.Y + " plus a random " + ev.DestRand.X + ", " + ev.DestRand.Y + ", at a speed of " + ev.MouseSpeed;
+                    }
                     break;
                 }
                 case ActionEvent.EventTypes.MouseButton:
@@ -167,21 +259,64 @@ namespace ActionRepeater
                 }
                 case ActionEvent.EventTypes.Keys:
                 {
-                    li.Text = "Send keys";
-                    li.SubItems.Add(ev.Keys);
+                    li.Text = "Send key " + ev.Key;
                     break;
                 }
             }
             listEvents.Items.Insert(index, li);
             listEvents.Columns[0].Width = -1;
-            listEvents.Columns[1].Width = -1;
 
             ActionEventSeries.GetInstance().InsertEvent(index, ev);
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void btnSave_Click(object sender, EventArgs e)
         {
-            ActionEventSeries.GetInstance().PlayEvents();
+            sfdMain.ShowDialog();
+        }
+
+        private void sfdMain_FileOk(object sender, CancelEventArgs e)
+        {
+            ActionEventSeries.GetInstance().SaveToFile(sfdMain.FileName);
+        }
+
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            ofdMain.ShowDialog();
+        }
+
+        private void ofdMain_FileOk(object sender, CancelEventArgs e)
+        {
+            ActionEventSeries.LoadFromFile(ofdMain.FileName);
+
+            ReloadEvents();
+        }
+
+        private void btnPlay_Click(object sender, EventArgs e)
+        {
+            if(playback == null)
+            {
+                playback = new Thread(() => PlayActions());
+                playback.Start();
+            }
+            else
+            {
+                if(playback.ThreadState == ThreadState.Aborted || playback.ThreadState == ThreadState.Stopped)
+                {
+                    playback = new Thread(() => PlayActions());
+                    playback.Start();
+                }
+            }
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            if(playback != null)
+            {
+                //if(playback.ThreadState == ThreadState.Running)
+                {
+                    playback.Abort();
+                }
+            }
         }
 
     }

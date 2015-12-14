@@ -24,11 +24,11 @@ namespace ActionRepeater
 
             double randomSpeed = Math.Max((random.Next(mouseSpeed) / 2.0 + mouseSpeed) / 10.0, 0.1);
 
-            double grav = mouseSpeed / 10;
-            double wind = mouseSpeed / 100;
+            double grav = (mouseSpeed / 15.0) * 9.0;
+            double wind = (mouseSpeed / 15.0) * 3.0;
 
-            WindMouse(c.X, c.Y, destX, destY, grav, wind, 10.0 / randomSpeed,
-                15.0 / randomSpeed, 10.0 * randomSpeed, 10.0 * randomSpeed);
+            WindMouse(c.X, c.Y, destX, destY, grav, wind, 11.0 / randomSpeed,
+                12.0 / randomSpeed, 10.0 * randomSpeed, 10.0 * randomSpeed);
         }
 
         public static void MoveMouse(int destX, int destY, int destRandX, int destRandY, int mouseSpd)

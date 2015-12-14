@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             this.cmbEventType = new System.Windows.Forms.ComboBox();
-            this.txtKeys = new System.Windows.Forms.TextBox();
             this.cmbMouseButton = new System.Windows.Forms.ComboBox();
             this.numWaitMS = new System.Windows.Forms.NumericUpDown();
             this.lblEventType = new System.Windows.Forms.Label();
@@ -55,6 +54,9 @@
             this.lblY = new System.Windows.Forms.Label();
             this.lblYPos = new System.Windows.Forms.Label();
             this.tmrCursUpdate = new System.Windows.Forms.Timer(this.components);
+            this.lblRelative = new System.Windows.Forms.Label();
+            this.cbRelative = new System.Windows.Forms.CheckBox();
+            this.cmbKey = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.numWaitMS)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMouseX)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMouseY)).BeginInit();
@@ -70,22 +72,13 @@
             this.cmbEventType.Items.AddRange(new object[] {
             "Wait",
             "Move Mouse",
-            "Send Keys",
+            "Send Key",
             "Click Mouse"});
-            this.cmbEventType.Location = new System.Drawing.Point(98, 12);
+            this.cmbEventType.Location = new System.Drawing.Point(150, 12);
             this.cmbEventType.Name = "cmbEventType";
             this.cmbEventType.Size = new System.Drawing.Size(142, 21);
             this.cmbEventType.TabIndex = 0;
             this.cmbEventType.SelectedIndexChanged += new System.EventHandler(this.cmbEventType_SelectedIndexChanged);
-            // 
-            // txtKeys
-            // 
-            this.txtKeys.Enabled = false;
-            this.txtKeys.Location = new System.Drawing.Point(120, 209);
-            this.txtKeys.MaxLength = 10;
-            this.txtKeys.Name = "txtKeys";
-            this.txtKeys.Size = new System.Drawing.Size(120, 20);
-            this.txtKeys.TabIndex = 7;
             // 
             // cmbMouseButton
             // 
@@ -95,10 +88,11 @@
             this.cmbMouseButton.Items.AddRange(new object[] {
             "Left",
             "Right"});
-            this.cmbMouseButton.Location = new System.Drawing.Point(120, 235);
+            this.cmbMouseButton.Location = new System.Drawing.Point(171, 259);
             this.cmbMouseButton.Name = "cmbMouseButton";
             this.cmbMouseButton.Size = new System.Drawing.Size(120, 21);
-            this.cmbMouseButton.TabIndex = 8;
+            this.cmbMouseButton.TabIndex = 9;
+            this.cmbMouseButton.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cmbMouseButton_KeyDown);
             // 
             // numWaitMS
             // 
@@ -107,7 +101,7 @@
             0,
             0,
             0});
-            this.numWaitMS.Location = new System.Drawing.Point(120, 50);
+            this.numWaitMS.Location = new System.Drawing.Point(171, 50);
             this.numWaitMS.Maximum = new decimal(new int[] {
             99990,
             0,
@@ -116,6 +110,8 @@
             this.numWaitMS.Name = "numWaitMS";
             this.numWaitMS.Size = new System.Drawing.Size(120, 20);
             this.numWaitMS.TabIndex = 1;
+            this.numWaitMS.Enter += new System.EventHandler(this.numWaitMS_Enter);
+            this.numWaitMS.KeyDown += new System.Windows.Forms.KeyEventHandler(this.numWaitMS_KeyDown);
             // 
             // lblEventType
             // 
@@ -189,17 +185,17 @@
             // 
             this.lblKeys.AutoSize = true;
             this.lblKeys.Enabled = false;
-            this.lblKeys.Location = new System.Drawing.Point(12, 212);
+            this.lblKeys.Location = new System.Drawing.Point(12, 235);
             this.lblKeys.Name = "lblKeys";
-            this.lblKeys.Size = new System.Drawing.Size(73, 13);
+            this.lblKeys.Size = new System.Drawing.Size(68, 13);
             this.lblKeys.TabIndex = 17;
-            this.lblKeys.Text = "Keys to Send:";
+            this.lblKeys.Text = "Key to Send:";
             // 
             // lblButton
             // 
             this.lblButton.AutoSize = true;
             this.lblButton.Enabled = false;
-            this.lblButton.Location = new System.Drawing.Point(12, 238);
+            this.lblButton.Location = new System.Drawing.Point(12, 262);
             this.lblButton.Name = "lblButton";
             this.lblButton.Size = new System.Drawing.Size(102, 13);
             this.lblButton.TabIndex = 18;
@@ -209,85 +205,113 @@
             // 
             this.numMouseX.Enabled = false;
             this.numMouseX.Increment = new decimal(new int[] {
-            50,
+            5,
             0,
             0,
             0});
-            this.numMouseX.Location = new System.Drawing.Point(120, 79);
+            this.numMouseX.Location = new System.Drawing.Point(171, 79);
             this.numMouseX.Maximum = new decimal(new int[] {
             99990,
             0,
             0,
             0});
+            this.numMouseX.Minimum = new decimal(new int[] {
+            99990,
+            0,
+            0,
+            -2147483648});
             this.numMouseX.Name = "numMouseX";
             this.numMouseX.Size = new System.Drawing.Size(120, 20);
             this.numMouseX.TabIndex = 2;
+            this.numMouseX.Enter += new System.EventHandler(this.numMouseX_Enter);
+            this.numMouseX.KeyDown += new System.Windows.Forms.KeyEventHandler(this.numMouseX_KeyDown);
             // 
             // numMouseY
             // 
             this.numMouseY.Enabled = false;
             this.numMouseY.Increment = new decimal(new int[] {
-            50,
+            5,
             0,
             0,
             0});
-            this.numMouseY.Location = new System.Drawing.Point(120, 105);
+            this.numMouseY.Location = new System.Drawing.Point(171, 105);
             this.numMouseY.Maximum = new decimal(new int[] {
             99990,
             0,
             0,
             0});
+            this.numMouseY.Minimum = new decimal(new int[] {
+            99990,
+            0,
+            0,
+            -2147483648});
             this.numMouseY.Name = "numMouseY";
             this.numMouseY.Size = new System.Drawing.Size(120, 20);
             this.numMouseY.TabIndex = 3;
+            this.numMouseY.Enter += new System.EventHandler(this.numMouseY_Enter);
+            this.numMouseY.KeyDown += new System.Windows.Forms.KeyEventHandler(this.numMouseY_KeyDown);
             // 
             // numMouseRX
             // 
             this.numMouseRX.Enabled = false;
             this.numMouseRX.Increment = new decimal(new int[] {
-            50,
+            5,
             0,
             0,
             0});
-            this.numMouseRX.Location = new System.Drawing.Point(120, 131);
+            this.numMouseRX.Location = new System.Drawing.Point(171, 131);
             this.numMouseRX.Maximum = new decimal(new int[] {
             99990,
             0,
             0,
             0});
+            this.numMouseRX.Minimum = new decimal(new int[] {
+            99990,
+            0,
+            0,
+            -2147483648});
             this.numMouseRX.Name = "numMouseRX";
             this.numMouseRX.Size = new System.Drawing.Size(120, 20);
             this.numMouseRX.TabIndex = 4;
+            this.numMouseRX.Enter += new System.EventHandler(this.numMouseRX_Enter);
+            this.numMouseRX.KeyDown += new System.Windows.Forms.KeyEventHandler(this.numMouseRX_KeyDown);
             // 
             // numMouseRY
             // 
             this.numMouseRY.Enabled = false;
             this.numMouseRY.Increment = new decimal(new int[] {
-            50,
+            5,
             0,
             0,
             0});
-            this.numMouseRY.Location = new System.Drawing.Point(120, 157);
+            this.numMouseRY.Location = new System.Drawing.Point(171, 157);
             this.numMouseRY.Maximum = new decimal(new int[] {
             99990,
             0,
             0,
             0});
+            this.numMouseRY.Minimum = new decimal(new int[] {
+            99990,
+            0,
+            0,
+            -2147483648});
             this.numMouseRY.Name = "numMouseRY";
             this.numMouseRY.Size = new System.Drawing.Size(120, 20);
             this.numMouseRY.TabIndex = 5;
+            this.numMouseRY.Enter += new System.EventHandler(this.numMouseRY_Enter);
+            this.numMouseRY.KeyDown += new System.Windows.Forms.KeyEventHandler(this.numMouseRY_KeyDown);
             // 
             // numMouseSpeed
             // 
             this.numMouseSpeed.Enabled = false;
-            this.numMouseSpeed.Location = new System.Drawing.Point(120, 183);
+            this.numMouseSpeed.Location = new System.Drawing.Point(171, 183);
             this.numMouseSpeed.Maximum = new decimal(new int[] {
             20,
             0,
             0,
             0});
             this.numMouseSpeed.Minimum = new decimal(new int[] {
-            5,
+            1,
             0,
             0,
             0});
@@ -295,27 +319,29 @@
             this.numMouseSpeed.Size = new System.Drawing.Size(120, 20);
             this.numMouseSpeed.TabIndex = 6;
             this.numMouseSpeed.Value = new decimal(new int[] {
-            5,
+            15,
             0,
             0,
             0});
+            this.numMouseSpeed.Enter += new System.EventHandler(this.numMouseSpeed_Enter);
+            this.numMouseSpeed.KeyDown += new System.Windows.Forms.KeyEventHandler(this.numMouseSpeed_KeyDown);
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(15, 338);
+            this.btnOK.Location = new System.Drawing.Point(15, 360);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(90, 34);
-            this.btnOK.TabIndex = 9;
+            this.btnOK.TabIndex = 10;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(150, 338);
+            this.btnCancel.Location = new System.Drawing.Point(150, 360);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(90, 34);
-            this.btnCancel.TabIndex = 10;
+            this.btnCancel.TabIndex = 11;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -324,7 +350,7 @@
             // 
             this.lblCurrMousePos.AutoSize = true;
             this.lblCurrMousePos.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCurrMousePos.Location = new System.Drawing.Point(32, 266);
+            this.lblCurrMousePos.Location = new System.Drawing.Point(32, 288);
             this.lblCurrMousePos.Name = "lblCurrMousePos";
             this.lblCurrMousePos.Size = new System.Drawing.Size(173, 20);
             this.lblCurrMousePos.TabIndex = 19;
@@ -333,7 +359,7 @@
             // lblX
             // 
             this.lblX.AutoSize = true;
-            this.lblX.Location = new System.Drawing.Point(12, 291);
+            this.lblX.Location = new System.Drawing.Point(12, 313);
             this.lblX.Name = "lblX";
             this.lblX.Size = new System.Drawing.Size(17, 13);
             this.lblX.TabIndex = 20;
@@ -342,7 +368,7 @@
             // lblXPos
             // 
             this.lblXPos.AutoSize = true;
-            this.lblXPos.Location = new System.Drawing.Point(35, 291);
+            this.lblXPos.Location = new System.Drawing.Point(35, 313);
             this.lblXPos.Name = "lblXPos";
             this.lblXPos.Size = new System.Drawing.Size(0, 13);
             this.lblXPos.TabIndex = 21;
@@ -350,7 +376,7 @@
             // lblY
             // 
             this.lblY.AutoSize = true;
-            this.lblY.Location = new System.Drawing.Point(12, 313);
+            this.lblY.Location = new System.Drawing.Point(12, 335);
             this.lblY.Name = "lblY";
             this.lblY.Size = new System.Drawing.Size(17, 13);
             this.lblY.TabIndex = 22;
@@ -359,7 +385,7 @@
             // lblYPos
             // 
             this.lblYPos.AutoSize = true;
-            this.lblYPos.Location = new System.Drawing.Point(35, 313);
+            this.lblYPos.Location = new System.Drawing.Point(35, 335);
             this.lblYPos.Name = "lblYPos";
             this.lblYPos.Size = new System.Drawing.Size(0, 13);
             this.lblYPos.TabIndex = 23;
@@ -369,11 +395,43 @@
             this.tmrCursUpdate.Interval = 10;
             this.tmrCursUpdate.Tick += new System.EventHandler(this.tmrCursUpdate_Tick);
             // 
+            // lblRelative
+            // 
+            this.lblRelative.AutoSize = true;
+            this.lblRelative.Location = new System.Drawing.Point(12, 211);
+            this.lblRelative.Name = "lblRelative";
+            this.lblRelative.Size = new System.Drawing.Size(149, 13);
+            this.lblRelative.TabIndex = 24;
+            this.lblRelative.Text = "Relative To Previous Position:";
+            // 
+            // cbRelative
+            // 
+            this.cbRelative.AutoSize = true;
+            this.cbRelative.Location = new System.Drawing.Point(171, 211);
+            this.cbRelative.Name = "cbRelative";
+            this.cbRelative.Size = new System.Drawing.Size(15, 14);
+            this.cbRelative.TabIndex = 7;
+            this.cbRelative.UseVisualStyleBackColor = true;
+            // 
+            // cmbKey
+            // 
+            this.cmbKey.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbKey.FormattingEnabled = true;
+            this.cmbKey.Location = new System.Drawing.Point(171, 232);
+            this.cmbKey.Name = "cmbKey";
+            this.cmbKey.Size = new System.Drawing.Size(121, 21);
+            this.cmbKey.TabIndex = 8;
+            this.cmbKey.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cmbKey_KeyDown);
+            // 
             // frmAddEvent
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(252, 377);
+            this.ClientSize = new System.Drawing.Size(352, 405);
+            this.ControlBox = false;
+            this.Controls.Add(this.cmbKey);
+            this.Controls.Add(this.cbRelative);
+            this.Controls.Add(this.lblRelative);
             this.Controls.Add(this.lblYPos);
             this.Controls.Add(this.lblY);
             this.Controls.Add(this.lblXPos);
@@ -397,8 +455,10 @@
             this.Controls.Add(this.lblEventType);
             this.Controls.Add(this.numWaitMS);
             this.Controls.Add(this.cmbMouseButton);
-            this.Controls.Add(this.txtKeys);
             this.Controls.Add(this.cmbEventType);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "frmAddEvent";
             this.Text = "Add New Event";
             ((System.ComponentModel.ISupportInitialize)(this.numWaitMS)).EndInit();
@@ -415,7 +475,6 @@
         #endregion
 
         private System.Windows.Forms.ComboBox cmbEventType;
-        private System.Windows.Forms.TextBox txtKeys;
         private System.Windows.Forms.ComboBox cmbMouseButton;
         private System.Windows.Forms.NumericUpDown numWaitMS;
         private System.Windows.Forms.Label lblEventType;
@@ -440,5 +499,8 @@
         private System.Windows.Forms.Label lblY;
         private System.Windows.Forms.Label lblYPos;
         private System.Windows.Forms.Timer tmrCursUpdate;
+        private System.Windows.Forms.Label lblRelative;
+        private System.Windows.Forms.CheckBox cbRelative;
+        private System.Windows.Forms.ComboBox cmbKey;
     }
 }
