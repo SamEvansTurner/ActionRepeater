@@ -31,11 +31,11 @@ namespace ActionRepeater
             set { eventType = value; }
         }
 
-        private String keys;
-        public String Keys
+        private InputImports.VirtualKeyShort key = InputImports.VirtualKeyShort.LBUTTON;
+        public InputImports.VirtualKeyShort Key
         {
-            get { return keys; }
-            set { keys = value; }
+            get { return key; }
+            set { key = value; }
         }
 
         private int waitTimeMS;
@@ -73,11 +73,18 @@ namespace ActionRepeater
             set { mouseSpeed = value; }
         }
 
+        private bool relative;
+        public bool Relative
+        {
+            get { return relative; }
+            set { relative = value; }
+        }
 
-        public ActionEvent(String keysToSend)
+
+        public ActionEvent(InputImports.VirtualKeyShort keysToSend)
         {
             eventType = EventTypes.Keys;
-            keys = keysToSend;
+            key = keysToSend;
         }
 
         public ActionEvent(int msToWait)
@@ -86,16 +93,17 @@ namespace ActionRepeater
             waitTimeMS = msToWait;
         }
 
-        public ActionEvent(Point dest, int randx, int randy, int mSpeed)
+        public ActionEvent(Point dest, int randx, int randy, int mSpeed, bool rel)
         {
             eventType = EventTypes.MouseMove;
             destination = dest;
             destRand.X = randx;
             destRand.Y = randy;
             mouseSpeed = mSpeed;
+            relative = rel;
         }
 
-        public ActionEvent(int x, int y, int randx, int randy, int mSpeed)
+        public ActionEvent(int x, int y, int randx, int randy, int mSpeed, bool rel)
         {
             eventType = EventTypes.MouseMove;
             destination.X = x;
@@ -103,6 +111,7 @@ namespace ActionRepeater
             destRand.X = randx;
             destRand.Y = randy;
             mouseSpeed = mSpeed;
+            relative = rel;
         }
 
         public ActionEvent(MouseButton mb)
@@ -111,12 +120,17 @@ namespace ActionRepeater
             mButton = mb;
         }
 
+        private ActionEvent()
+        {
+
+        }
+
         public void ProcessEvent()
         {
             switch (eventType)
             {
                 case EventTypes.Keys:
-                    SendKeys.SendWait(keys);
+                    InputImports.SendKey(key);
                     break;
                 case EventTypes.MouseButton:
                 { 
@@ -132,10 +146,24 @@ namespace ActionRepeater
                     break;     
                }
                 case EventTypes.MouseMove:
-                    MouseMover.MoveMouse(destination.X, destination.Y, destRand.X, destRand.Y, mouseSpeed);
+                    if(relative)
+                    {
+                        Point pos = Cursor.Position;
+                        pos.X += destination.X;
+                        pos.Y += destination.Y;
+                        MouseMover.MoveMouse(pos.X, pos.Y, destRand.X, destRand.Y, mouseSpeed);
+                    }
+                    else
+                    {
+                        MouseMover.MoveMouse(destination.X, destination.Y, destRand.X, destRand.Y, mouseSpeed);
+                    }
+                    
                     break;
                 case EventTypes.Wait:
                     System.Threading.Thread.Sleep(waitTimeMS);
+                    Random rnd = new Random();
+                    int wait = rnd.Next(100);
+                    System.Threading.Thread.Sleep(wait);
                     break;
             }
         }

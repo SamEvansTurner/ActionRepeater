@@ -9,8 +9,11 @@ using System.Xml.Serialization;
 
 namespace ActionRepeater
 {
-    class ActionEventSeries
+    public class ActionEventSeries
     {
+
+        private static ActionEventSeries instance;
+
         private List<ActionEvent> events = new List<ActionEvent>();
         public List<ActionEvent> Events
         {
@@ -25,7 +28,6 @@ namespace ActionRepeater
             set { mSpeed = value; }
         }
 
-        private static ActionEventSeries instance;
 
         private ActionEventSeries()
         {
@@ -80,6 +82,8 @@ namespace ActionRepeater
             FileStream fs = new FileStream(filename, FileMode.Create);
             XmlSerializer ser = new XmlSerializer(typeof(ActionEventSeries));
             ser.Serialize(fs, instance);
+
+            
 
             fs.Flush();
             fs.Close();
