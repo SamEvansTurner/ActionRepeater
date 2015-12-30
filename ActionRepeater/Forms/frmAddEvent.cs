@@ -18,7 +18,7 @@ namespace ActionRepeater.Forms
         ActionEvent newEvent;
         frmMain.AddTypes returnAddType;
 
-        public frmAddEvent(GrabEvent callback, frmMain.AddTypes addType)
+        public frmAddEvent(GrabEvent callback, frmMain.AddTypes addType, frmMain.AddPos addPos)
         {
             InitializeComponent();
 

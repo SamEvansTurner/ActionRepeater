@@ -21,6 +21,13 @@ namespace ActionRepeater
             set { events = value; }
         }
 
+        private List<ActionEvent> eventsAfterLoops = new List<ActionEvent>();
+        public List<ActionEvent> EventsAfterLoops
+        {
+            get { return eventsAfterLoops; }
+            set { eventsAfterLoops = value; }
+        }
+
         private int mSpeed = 18;
         public int MSpeed
         {
@@ -52,6 +59,14 @@ namespace ActionRepeater
             }
         }
 
+        public void PlayAfterLoopEvents()
+        {
+            for (int i = 0; i < eventsAfterLoops.Count; i++)
+            {
+                eventsAfterLoops[i].ProcessEvent();
+            }
+        }
+
         public void ClearEvents()
         {
             events.Clear();
@@ -67,9 +82,24 @@ namespace ActionRepeater
             return events[index];
         }
 
+        public ActionEvent GetEventAfterLoop(int index)
+        {
+            return eventsAfterLoops[index];
+        }
+
         public void InsertEvent(int index, ActionEvent ev)
         {
             events.Insert(index, ev);
+        }
+
+        public void InsertEventToAfterLoops(int index, ActionEvent ev)
+        {
+            eventsAfterLoops.Insert(index, ev);
+        }
+
+        public void AddEventToAfterLoops(ActionEvent ev)
+        {
+            eventsAfterLoops.Add(ev);
         }
 
         public void AddEvent(ActionEvent ev)
