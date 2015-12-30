@@ -42,6 +42,7 @@
             this.lblRepeats = new System.Windows.Forms.Label();
             this.numLoops = new System.Windows.Forms.NumericUpDown();
             this.btnStop = new System.Windows.Forms.PictureBox();
+            this.btnAfterLoopsEvents = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.btnPlay)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnSave)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnLoad)).BeginInit();
@@ -59,7 +60,7 @@
             this.listEvents.Location = new System.Drawing.Point(12, 75);
             this.listEvents.MultiSelect = false;
             this.listEvents.Name = "listEvents";
-            this.listEvents.Size = new System.Drawing.Size(445, 553);
+            this.listEvents.Size = new System.Drawing.Size(445, 501);
             this.listEvents.TabIndex = 0;
             this.listEvents.UseCompatibleStateImageBehavior = false;
             this.listEvents.View = System.Windows.Forms.View.Details;
@@ -187,11 +188,22 @@
             this.btnStop.TabStop = false;
             this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
             // 
+            // btnAfterLoopsEvents
+            // 
+            this.btnAfterLoopsEvents.Location = new System.Drawing.Point(13, 582);
+            this.btnAfterLoopsEvents.Name = "btnAfterLoopsEvents";
+            this.btnAfterLoopsEvents.Size = new System.Drawing.Size(444, 46);
+            this.btnAfterLoopsEvents.TabIndex = 13;
+            this.btnAfterLoopsEvents.Text = "Execute events after loops are complete";
+            this.btnAfterLoopsEvents.UseVisualStyleBackColor = true;
+            this.btnAfterLoopsEvents.Click += new System.EventHandler(this.btnAfterLoopsEvents_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(469, 693);
+            this.Controls.Add(this.btnAfterLoopsEvents);
             this.Controls.Add(this.btnStop);
             this.Controls.Add(this.numLoops);
             this.Controls.Add(this.lblRepeats);
@@ -229,6 +241,7 @@
         private System.Windows.Forms.Label lblRepeats;
         private System.Windows.Forms.NumericUpDown numLoops;
         private System.Windows.Forms.PictureBox btnStop;
+        private System.Windows.Forms.Button btnAfterLoopsEvents;
     }
 }
 
