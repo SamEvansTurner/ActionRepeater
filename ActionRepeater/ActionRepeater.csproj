@@ -11,6 +11,21 @@
     <AssemblyName>ActionRepeater</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,7 +46,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>ActionRepeater.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\ActionRepeater.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -44,19 +66,39 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Forms\frmAfterLoopsEvents.cs">
+    <Compile Include="Forms\frmHighlight.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\frmAfterLoopsEvents.Designer.cs">
-      <DependentUpon>frmAfterLoopsEvents.cs</DependentUpon>
+    <Compile Include="Forms\frmHighlight.Designer.cs">
+      <DependentUpon>frmHighlight.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\KeyboardHook.cs" />
+    <Compile Include="Forms\frmRecord.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmRecord.Designer.cs">
+      <DependentUpon>frmRecord.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmRecordHelp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmRecordHelp.Designer.cs">
+      <DependentUpon>frmRecordHelp.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmSpeedLabel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmSpeedLabel.Designer.cs">
+      <DependentUpon>frmSpeedLabel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\APIs\KeyboardHook.cs" />
     <Compile Include="Forms\frmAddEvent.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\frmAddEvent.Designer.cs">
       <DependentUpon>frmAddEvent.cs</DependentUpon>
     </Compile>
+    <Compile Include="src\APIs\MouseRecord.cs" />
+    <Compile Include="src\APIs\KeyRecord.cs" />
     <Compile Include="src\Events\ActionEvent.cs" />
     <Compile Include="src\Events\ActionEventSeries.cs" />
     <Compile Include="Forms\frmMain.cs">
@@ -69,14 +111,24 @@
     <Compile Include="src\APIs\MouseMover.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Events\RecordEvent.cs" />
+    <EmbeddedResource Include="Forms\frmHighlight.resx">
+      <DependentUpon>frmHighlight.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\frmAddEvent.resx">
       <DependentUpon>frmAddEvent.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\frmAfterLoopsEvents.resx">
-      <DependentUpon>frmAfterLoopsEvents.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmRecord.resx">
+      <DependentUpon>frmRecord.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmRecordHelp.resx">
+      <DependentUpon>frmRecordHelp.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmSpeedLabel.resx">
+      <DependentUpon>frmSpeedLabel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -100,6 +152,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\btnPlay-Disabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\btnPlay-Enabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\btnStop-Disabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\btnStop-Enabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ActionRepeater.ico" />
+    <None Include="Resources\ActionRepeater.ico" />
+    <None Include="Resources\Main.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
