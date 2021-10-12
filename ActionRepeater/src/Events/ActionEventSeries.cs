@@ -1,134 +1,148 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace ActionRepeater
-{
-    public class ActionEventSeries
-    {
+namespace ActionRepeater {
+    [XmlRoot("ActionEventSeries")]
+    public class ActionEventSeries {
 
         private static ActionEventSeries instance;
 
-        private List<ActionEvent> events = new List<ActionEvent>();
-        public List<ActionEvent> Events
-        {
-            get { return events; }
-            set { events = value; }
-        }
+        private List<ActionEvent> before = new List<ActionEvent>();
 
-        private List<ActionEvent> eventsAfterLoops = new List<ActionEvent>();
-        public List<ActionEvent> EventsAfterLoops
-        {
-            get { return eventsAfterLoops; }
-            set { eventsAfterLoops = value; }
+        private List<ActionEvent> loop = new List<ActionEvent>();
+
+        private List<ActionEvent> after = new List<ActionEvent>();
+        private List<List<ActionEvent>> queues = new List<List<ActionEvent>>();
+
+        private int iNumLoops = 1;
+
+        [XmlIgnore]
+        public List<List<ActionEvent>> EventQueues {
+            get { return queues; }
+            set { queues = value; }
+        }
+        [XmlArray("Before")]
+        [XmlArrayItem("ActionEvent")]
+        public List<ActionEvent> BeforeEvents {
+            get { return before; }
+            set { before = value; }
+        }
+        [XmlArray("Loop")]
+        [XmlArrayItem("ActionEvent")]
+        public List<ActionEvent> LoopEvents {
+            get { return loop; }
+            set { loop = value; }
+        }
+        [XmlArray("After")]
+        [XmlArrayItem("ActionEvent")]
+        public List<ActionEvent> AfterEvents {
+            get { return after; }
+            set { after = value; }
+        }
+        [XmlElement("Loops")]
+        public int Loops {
+            get { return iNumLoops; }
+            set { iNumLoops = value; }
         }
 
         private int mSpeed = 18;
-        public int MSpeed
-        {
+        [XmlElement("MSpeed")]
+        public int MSpeed {
             get { return mSpeed; }
             set { mSpeed = value; }
         }
 
 
-        private ActionEventSeries()
-        {
-
+        private ActionEventSeries() {
+            queues.Add(before);
+            queues.Add(loop);
+            queues.Add(after);
         }
 
-        public static ActionEventSeries GetInstance()
-        {
-            if (instance == null)
-            {
+        public static ActionEventSeries GetInstance() {
+            if (instance == null) {
                 instance = new ActionEventSeries();
             }
-            
+
             return instance;
         }
-      
-        public void PlayEvents()
-        {
-            for (int i = 0; i < events.Count; i ++)
-            {
-                events[i].ProcessEvent();
+
+        public void PlayEvents() {
+
+            foreach (ActionEvent ev in before) {
+                ev.ProcessEvent();
+            }
+            Stopwatch st = new Stopwatch();
+            st.Start();
+            for (int i = 0; i < iNumLoops; i++) {
+                foreach (ActionEvent ev in loop) {
+                    ev.ProcessEvent();
+                    Console.WriteLine("" + st.ElapsedMilliseconds);
+                    st.Restart();
+                }
+                Console.WriteLine("");
+            }
+            st.Stop();
+            foreach (ActionEvent ev in after) {
+                ev.ProcessEvent();
             }
         }
 
-        public void PlayAfterLoopEvents()
-        {
-            for (int i = 0; i < eventsAfterLoops.Count; i++)
-            {
-                eventsAfterLoops[i].ProcessEvent();
-            }
+        public void ClearEvents(int queue) {
+            queues[queue].Clear();
         }
 
-        public void ClearEvents()
-        {
-            events.Clear();
+        public void RemoveEvent(int queue, int index) {
+            queues[queue].RemoveAt(index);
         }
 
-        public void RemoveEvent(int index)
-        {
-            events.RemoveAt(index);
+        public ActionEvent GetEvent(int queue, int index) {
+            return queues[queue][index];
         }
 
-        public ActionEvent GetEvent(int index)
-        {
-            return events[index];
+        public void InsertEvent(int queue, int index, ActionEvent ev) {
+            queues[queue].Insert(index, ev);
         }
 
-        public ActionEvent GetEventAfterLoop(int index)
-        {
-            return eventsAfterLoops[index];
+        public void AddEvent(int queue, ActionEvent ev) {
+            queues[queue].Add(ev);
         }
 
-        public void InsertEvent(int index, ActionEvent ev)
-        {
-            events.Insert(index, ev);
-        }
-
-        public void InsertEventToAfterLoops(int index, ActionEvent ev)
-        {
-            eventsAfterLoops.Insert(index, ev);
-        }
-
-        public void AddEventToAfterLoops(ActionEvent ev)
-        {
-            eventsAfterLoops.Add(ev);
-        }
-
-        public void AddEvent(ActionEvent ev)
-        {
-            events.Add(ev);
-        }
-
-        public void SaveToFile(String filename)
-        {
+        public void SaveToFile(String filename) {
             FileStream fs = new FileStream(filename, FileMode.Create);
             XmlSerializer ser = new XmlSerializer(typeof(ActionEventSeries));
+            ser.UnknownNode += new XmlNodeEventHandler(serializer_UnknownNode);
+            ser.UnknownAttribute += new XmlAttributeEventHandler(serializer_UnknownAttribute);
+            ser.UnknownElement += new XmlElementEventHandler(serializer_UnknownElement);
             ser.Serialize(fs, instance);
 
-            
+
 
             fs.Flush();
             fs.Close();
             fs.Dispose();
         }
 
-        public static void LoadFromFile(String filename)
-        {
+        private static void serializer_UnknownAttribute(object sender, XmlAttributeEventArgs e) {
+            throw new System.NotImplementedException();
+        }
+
+        private static void serializer_UnknownNode(object sender, XmlNodeEventArgs e) {
+            throw new System.NotImplementedException();
+        }
+
+        private static void serializer_UnknownElement(object sender, XmlElementEventArgs e) {
+            throw new System.NotImplementedException();
+        }
+
+        public static void LoadFromFile(String filename) {
             FileStream fs;
-            try
-            {
+            try {
                 fs = new FileStream(filename, FileMode.Open);
-            }
-            catch (System.IO.FileNotFoundException)
-            {
+            } catch (System.IO.FileNotFoundException) {
                 return;
             }
 

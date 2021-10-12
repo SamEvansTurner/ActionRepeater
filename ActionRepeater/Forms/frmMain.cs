@@ -2,337 +2,289 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
-namespace ActionRepeater
-{
-    public partial class frmMain : Form
-    {
-        Thread playback;
+namespace ActionRepeater {
+    public partial class frmMain : Form {
+        Thread tPlayback;
         KeyboardHook keyHook = new KeyboardHook();
-        frmAfterLoopsEvents frmAfter = new frmAfterLoopsEvents();
-
-        public enum AddTypes
-        {
+        private List<ListView> arrTabs = new List<ListView>();
+        private bool bRunning = false;
+        public delegate void LoopEnd();
+        private AddTypes addType = AddTypes.Add;
+        public enum AddTypes {
             Add,
-            Insert
+            Insert,
+            Edit
         }
 
-        public enum AddPos
-        {
-            Main,
-            AfterLoops
-        }
-
-        public frmMain()
-        {
+        public frmMain() {
             InitializeComponent();
-
+            arrTabs.Add(listBefore);
+            arrTabs.Add(listLoopEvents);
+            arrTabs.Add(listAfter);
             keyHook.KeyPressed += new EventHandler<KeyPressedEventArgs>(hook_KeyPressed);
-            keyHook.RegisterHotKey(ActionRepeater.Forms.ModifierKeys.None, Keys.F5);
-            
+            keyHook.RegisterHotKey(ActionRepeater.ModifierKeys.None, Keys.F5);
+            this.Icon = Properties.Resources.ActionRepeater;
+            tabPages.SelectedTab = tabPages.TabPages["tabLoop"];
         }
 
-        void hook_KeyPressed(object sender, KeyPressedEventArgs e)
-        {
-            if (playback == null)
-            {
-                playback = new Thread(() => PlayActions());
-                playback.Start();
-            }
-            else
-            {
-                if (playback.ThreadState == ThreadState.Aborted || playback.ThreadState == ThreadState.Stopped)
-                {
-                    playback = new Thread(() => PlayActions());
-                    playback.Start();
-                }
-                else//if (playback.ThreadState == ThreadState.Running)
-                {
-                    playback.Abort();
+
+        private void ReloadEvents() {
+            for (int i = 0; i < tabPages.TabPages.Count; i++) {
+                arrTabs[i].Items.Clear();
+                List<ActionEvent> li = ActionEventSeries.GetInstance().EventQueues[i];
+                foreach (ActionEvent e in li) {
+                    AddEventToList(i, e);
                 }
             }
+            numLoops.Value = ActionEventSeries.GetInstance().Loops;
         }
 
-        private void ReloadEvents()
-        {
-            listEvents.Items.Clear();
-            for(int i = 0; i < ActionEventSeries.GetInstance().Events.Count; i++)
-            {
-                AddEventToListIndex(i, ActionEventSeries.GetInstance().GetEvent(i));
+        private void listEvents_SelectedIndexChanged(object sender, EventArgs e) {
+            if (arrTabs[tabPages.SelectedIndex].SelectedIndices.Count > 0) {
+                EnableButtons(true);
             }
         }
 
-        private void listEvents_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (listEvents.SelectedIndices.Count > 0)
-            {
-                btnInsertEvent.Enabled = true;
+        private void listEvents_MouseUp(object sender, MouseEventArgs e) {
+            if (arrTabs[tabPages.SelectedIndex].SelectedIndices.Count == 0) {
+                EnableButtons(false);
             }
         }
 
-        private void listEvents_MouseUp(object sender, MouseEventArgs e)
-        {
-            if(listEvents.SelectedIndices.Count == 0)
-            {
-                btnInsertEvent.Enabled = false;
-            }
-        }
-
-        private void listEvents_KeyDown(object sender, KeyEventArgs e)
-        {
-            if(e.KeyCode == Keys.Delete)
-            {
-                if(listEvents.SelectedIndices.Count > 0)
-                {
+        private void listEvents_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Delete) {
+                if (arrTabs[tabPages.SelectedIndex].SelectedIndices.Count > 0) {
                     DeleteEvent();
                 }
-                
             }
         }
 
-        private void PlayActions()
-        {
-            int nLoops = (int)numLoops.Value;
-            for (int i = nLoops; i > 0; i--)
-            {
-                ActionEventSeries.GetInstance().PlayEvents();
-            }
-
-            ActionEventSeries.GetInstance().PlayAfterLoopEvents();
-
-        }
-
-        private void DeleteEvent()
-        {
-            int index = listEvents.SelectedIndices[0];
+        private void DeleteEvent() {
+            int iTab = tabPages.SelectedIndex;
+            ListView listEvents = arrTabs[iTab];
+            int index = arrTabs[tabPages.SelectedIndex].SelectedIndices[0];
 
             listEvents.Items.RemoveAt(index);
-            ActionEventSeries.GetInstance().RemoveEvent(index);
+            ActionEventSeries.GetInstance().RemoveEvent(iTab, index);
             listEvents.Focus();
 
-            if (index >= listEvents.Items.Count)
-            {
+            if (index >= arrTabs[tabPages.SelectedIndex].Items.Count) {
                 index -= 1;
             }
 
-            if (listEvents.Items.Count > 0)
-            {
+            if (listEvents.Items.Count > 0) {
                 listEvents.Items[index].Selected = true;
-            }
-            else
-            {
-                ActionEventSeries.GetInstance().ClearEvents();
+            } else {
+                ActionEventSeries.GetInstance().ClearEvents(iTab);
                 listEvents.Items.Clear();
                 listEvents.Focus();
-                btnInsertEvent.Enabled = false;
+                EnableButtons(false);
+
             }
         }
 
-        private void btnDeleteEvent_Click(object sender, EventArgs e)
-        {
-            if (listEvents.Items.Count > 0)
-            {
-                if (listEvents.SelectedIndices.Count > 0)
-                {
+        private void btnDeleteEvent_Click(object sender, EventArgs e) {
+            ListView listEvents = arrTabs[tabPages.SelectedIndex];
+            if (listEvents.Items.Count > 0) {
+                if (listEvents.SelectedIndices.Count > 0) {
                     DeleteEvent();
                 }
             }
         }
 
-        private void btnAddNewEvent_Click(object sender, EventArgs e)
-        {
-            frmAddEvent f = new frmAddEvent(RetrieveEvent, AddTypes.Add, AddPos.Main);
+        private void btnAddNewEvent_Click(object sender, EventArgs e) {
+            addType = AddTypes.Add;
+            frmAddEvent f = new frmAddEvent(RetrieveEvent);
             f.Show();
             f.Focus();
         }
 
-        private void btnInsertEvent_Click(object sender, EventArgs e)
-        {
-            frmAddEvent f = new frmAddEvent(RetrieveEvent, AddTypes.Insert, AddPos.Main);
+        private void btnInsertEvent_Click(object sender, EventArgs e) {
+            addType = AddTypes.Insert;
+            frmAddEvent f = new frmAddEvent(RetrieveEvent);
+            f.Show();
+            f.Focus();
+        }
+        private void btnEdit_Click(object sender, EventArgs e) {
+            addType = AddTypes.Edit;
+            int iTab = tabPages.SelectedIndex;
+            int iEventIndex = arrTabs[iTab].SelectedItems[0].Index;
+            ActionEvent ev = ActionEventSeries.GetInstance().EventQueues[iTab][iEventIndex];
+            frmAddEvent f = new frmAddEvent(UpdateEvent, ev);
             f.Show();
             f.Focus();
         }
 
-        private void RetrieveEvent(ActionEvent ev, AddTypes addType)
-        {
-            switch(addType)
-            {
-                case AddTypes.Add:
-                {
-                    AddEventToIndex(listEvents.Items.Count, ev);
-                    break;
-                }
-                case AddTypes.Insert:
-                {
-                    AddEventToIndex(listEvents.SelectedIndices[0], ev);
-                    break;
-                }
+        private void RetrieveEvent(ActionEvent ev) {
+            int iTab = tabPages.SelectedIndex;
+            ListView listEvents = arrTabs[iTab];
+            switch (addType) {
+                case AddTypes.Add: {
+                        AddEventToIndex(iTab, ev);
+                        break;
+                    }
+                case AddTypes.Insert: {
+                        AddEventToIndex(iTab, ev, listEvents.SelectedIndices[0]);
+                        break;
+                    }
             }
         }
 
-        private void AddEventToListIndex(int index, ActionEvent ev)
-        {
-            ListViewItem li = new ListViewItem();
-            switch (ev.EventType)
-            {
-                case ActionEvent.EventTypes.Wait:
-                    {
-                        li.Text = "Wait " + ev.WaitTimeMS.ToString() + " ms";
-                        break;
-                    }
-                case ActionEvent.EventTypes.MouseMove:
-                    {
-                        if(ev.Relative)
-                        {
-                            li.Text = "Move Mouse " + ev.Destination.X + ", " + ev.Destination.Y + " plus a random " + ev.DestRand.X + ", " + ev.DestRand.Y + ", at a speed of " + ev.MouseSpeed + " from the current position";
-                        }
-                        else
-                        {
-                            li.Text = "Move Mouse to " + ev.Destination.X + ", " + ev.Destination.Y + " plus a random " + ev.DestRand.X + ", " + ev.DestRand.Y + ", at a speed of " + ev.MouseSpeed;
-                        }
-                        break;
-                    }
-                case ActionEvent.EventTypes.MouseButton:
-                    {
-                        switch (ev.MButton)
-                        {
-                            case ActionEvent.MouseButton.Left:
-                                {
-                                    li.Text = "Left Click";
-                                    break;
-                                }
-                            case ActionEvent.MouseButton.Right:
-                                {
-                                    li.Text = "Right Click";
-                                    break;
-                                }
-                        }
-                        break;
-                    }
-                case ActionEvent.EventTypes.Keys:
-                    {
-                        li.Text = "Send keys " + ev.Key;
-                        break;
-                    }
+        private void UpdateEvent(ActionEvent ev) {
+            int iTab = tabPages.SelectedIndex;
+            ListView listEvents = arrTabs[iTab];
+            int iPrevIndex = listEvents.SelectedIndices[0];
+            AddEventToIndex(iTab, ev, iPrevIndex);
+            DeleteEvent();
+            int iIndex = listEvents.SelectedIndices[0];
+            if (iPrevIndex != iIndex) {
+                listEvents.Items[iIndex].Selected = false;
+                listEvents.Items[iPrevIndex].Selected = true;
             }
+
+
+        }
+
+        private void RetrieveEvents(List<ActionEvent> ev) {
+            List<ActionEvent> li = ActionEventSeries.GetInstance().EventQueues[tabPages.SelectedIndex];
+            li.Clear();
+            li.AddRange(ev);
+            ReloadEvents();
+        }
+
+
+        private void AddEventToList(int queue, ActionEvent ev, int index = -1) {
+            ListView listEvents = arrTabs[queue];
+            if (index == -1) {
+                index = listEvents.Items.Count;
+            }
+            ListViewItem li = new ListViewItem();
+            li.Text = ev.ToString();
             listEvents.Items.Insert(index, li);
             listEvents.Columns[0].Width = -1;
         }
 
-        private void AddEventToIndex(int index, ActionEvent ev)
-        {
-            ListViewItem li = new ListViewItem();
-            switch (ev.EventType)
-            {
-                case ActionEvent.EventTypes.Wait:
-                {
-                    li.Text = "Wait " + ev.WaitTimeMS.ToString() + " ms";
-                    break;
-                }
-                case ActionEvent.EventTypes.MouseMove:
-                {
-                    if (ev.Relative)
-                    {
-                        li.Text = "Move Mouse " + ev.Destination.X + ", " + ev.Destination.Y + " plus a random " + ev.DestRand.X + ", " + ev.DestRand.Y + ", at a speed of " + ev.MouseSpeed + " from the current position";
-                    }
-                    else
-                    {
-                        li.Text = "Move Mouse to " + ev.Destination.X + ", " + ev.Destination.Y + " plus a random " + ev.DestRand.X + ", " + ev.DestRand.Y + ", at a speed of " + ev.MouseSpeed;
-                    }
-                    break;
-                }
-                case ActionEvent.EventTypes.MouseButton:
-                {
-                    switch(ev.MButton)
-                    {
-                        case ActionEvent.MouseButton.Left:
-                        {
-                            li.Text = "Left Click";
-                            break;
-                        }
-                        case ActionEvent.MouseButton.Right:
-                        {
-                            li.Text = "Right Click";
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case ActionEvent.EventTypes.Keys:
-                {
-                    li.Text = "Send key " + ev.Key;
-                    break;
-                }
+        private void AddEventToIndex(int queue, ActionEvent ev, int index = -1) {
+            if (index == -1) {
+                index = ActionEventSeries.GetInstance().EventQueues[queue].Count;
             }
-            listEvents.Items.Insert(index, li);
-            listEvents.Columns[0].Width = -1;
-
-            ActionEventSeries.GetInstance().InsertEvent(index, ev);
+            AddEventToList(queue, ev, index);
+            ActionEventSeries.GetInstance().InsertEvent(queue, index, ev);
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
-        {
+        private void btnSave_Click(object sender, EventArgs e) {
             sfdMain.ShowDialog();
         }
 
-        private void sfdMain_FileOk(object sender, CancelEventArgs e)
-        {
+        private void sfdMain_FileOk(object sender, CancelEventArgs e) {
             ActionEventSeries.GetInstance().SaveToFile(sfdMain.FileName);
         }
 
-        private void btnLoad_Click(object sender, EventArgs e)
-        {
+        private void btnLoad_Click(object sender, EventArgs e) {
             ofdMain.ShowDialog();
         }
 
-        private void ofdMain_FileOk(object sender, CancelEventArgs e)
-        {
+        private void ofdMain_FileOk(object sender, CancelEventArgs e) {
             ActionEventSeries.LoadFromFile(ofdMain.FileName);
 
             ReloadEvents();
-            frmAfter.ReloadEventsEAL();
         }
 
-        private void btnPlay_Click(object sender, EventArgs e)
-        {
-            if(playback == null)
-            {
-                playback = new Thread(() => PlayActions());
-                playback.Start();
-            }
-            else
-            {
-                if(playback.ThreadState == ThreadState.Aborted || playback.ThreadState == ThreadState.Stopped)
-                {
-                    playback = new Thread(() => PlayActions());
-                    playback.Start();
+        private void btnPlay_Click(object sender, EventArgs e) {
+            StartStop(true);
+        }
+
+        private void btnStop_Click(object sender, EventArgs e) {
+            StartStop(false);
+        }
+
+        private void EnableButtons(bool bEnable) {
+            btnInsertEvent.Enabled = bEnable;
+            btnEdit.Enabled = bEnable;
+            btnDeleteEvent.Enabled = bEnable;
+        }
+
+        private void StartStop(bool start) {
+            if (start) {
+                if (tPlayback != null) {
+                    tPlayback.Abort();
+                    tPlayback = null;
                 }
+                tPlayback = new Thread(() => PlayActions());
+                tPlayback.Start();
+            } else {
+                tPlayback.Abort();
+                tPlayback = null;
+            }
+            bRunning = start;
+            PlayStopButtons(start);
+        }
+        private void PlayActions() {
+            try {
+                ActionEventSeries.GetInstance().PlayEvents();
+            } finally {
+                LoopEnd LoopEndActions = new LoopEnd(EndActions);
+                this.BeginInvoke(LoopEndActions, null);
             }
         }
 
-        private void btnStop_Click(object sender, EventArgs e)
-        {
-            if(playback != null)
-            {
-                //if(playback.ThreadState == ThreadState.Running)
-                {
-                    playback.Abort();
-                }
+        private void EndActions() {
+            bRunning = false;
+            PlayStopButtons(false);
+        }
+
+        void hook_KeyPressed(object sender, KeyPressedEventArgs e) {
+            StartStop(!bRunning);
+        }
+
+        private void PlayStopButtons(bool playbackRunning) {
+            btnPlay.Enabled = !playbackRunning;
+            btnStop.Enabled = playbackRunning;
+            if (playbackRunning) {
+                btnPlay.Image = Properties.Resources.btnPlay_Disabled;
+                btnStop.Image = Properties.Resources.btnStop_Enabled;
+            } else {
+                btnPlay.Image = Properties.Resources.btnPlay_Enabled;
+                btnStop.Image = Properties.Resources.btnStop_Disabled;
             }
+
         }
 
-        private void btnAfterLoopsEvents_Click(object sender, EventArgs e)
-        {
-            frmAfter.Show();
+        private void numLoops_ValueChanged(object sender, EventArgs e) {
+            ActionEventSeries.GetInstance().Loops = (int)numLoops.Value;
         }
 
+        private void btnRecord_Click(object sender, EventArgs e) {
+            frmRecord f = new frmRecord(RetrieveEvents);
+            f.Show();
+            f.Focus();
+        }
+
+        private void tabPages_Selected(object sender, TabControlEventArgs e) {
+            int iTab = tabPages.SelectedIndex;
+            foreach (ListViewItem li in arrTabs[iTab].SelectedItems) {
+                li.Selected = false;
+            }
+            EnableButtons(false);
+
+        }
+
+        private void list_MouseDoubleClick(object sender, MouseEventArgs e) {
+            
+            addType = AddTypes.Edit;
+            int iTab = tabPages.SelectedIndex;
+            if (arrTabs[iTab].SelectedItems.Count > 0) {
+                int iEventIndex = arrTabs[iTab].SelectedItems[0].Index;
+                ActionEvent ev = ActionEventSeries.GetInstance().EventQueues[iTab][iEventIndex];
+                frmAddEvent f = new frmAddEvent(UpdateEvent, ev);
+                f.Show();
+                f.Focus();
+            }
+            
+        }
     }
 }

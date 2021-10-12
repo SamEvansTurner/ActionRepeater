@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
-namespace ActionRepeater
-{
-    public static class InputImports
-    {
-       
+namespace ActionRepeater {
+    public static class InputImports {
+
         [DllImport("user32.dll", SetLastError = true)]
         static extern uint SendInput(uint nInputs, ref INPUT pInputs, int cbSize);
 
@@ -21,9 +15,24 @@ namespace ActionRepeater
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GetCursorPos(out Point lpPoint);
 
+        public delegate IntPtr LowLevelHookProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetWindowsHookEx(int idHook, LowLevelHookProc lpfn, IntPtr hMod, uint dwThreadId);
+
+        [DllImport("user32.dll")]
+        public static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetModuleHandle(String lpModuleName);
+
+
         [Flags]
-        internal enum KEYEVENTF : uint
-        {
+        internal enum KEYEVENTF : uint {
             KEYDOWN = 0x0000,
             EXTENDEDKEY = 0x0001,
             KEYUP = 0x0002,
@@ -31,32 +40,75 @@ namespace ActionRepeater
             UNICODE = 0x0004
         }
 
-        public enum VirtualKeyShort : short
-        {
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT {
+            public int x;
+            public int y;
+
+            public POINT(int x = 0, int y = 0) {
+                this.x = x;
+                this.y = y;
+            }
+            public override string ToString() {
+                return string.Format("({0},{1})", x.ToString(), y.ToString());
+            }
+        }
+
+        const int WS_EX_TRANSPARENT = 0x00000020;
+        const int GWL_EXSTYLE = (-20);
+
+        [DllImport("user32.dll")]
+        static extern int GetWindowLong(IntPtr hwnd, int index);
+
+        [DllImport("user32.dll")]
+        static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
+
+        public static void SetWindowExTransparent(IntPtr hwnd) {
+            var extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT);
+        }
+
+        public struct MSLLHOOKSTRUCT {
+            public POINT pt;
+            public uint mouseData;
+            public int flag;
+            public int time;
+            public int dwExtraInfo;
+        }
+
+        public struct KBDLLHOOKSTRUCT {
+            public int vkCode;
+            public int scanCode;
+            public int flags;
+            public int time;
+            public int dwExtraInfo;
+        }
+
+        public enum VirtualKeyShort : short {
             ///<summary>
             ///Left mouse button
             ///</summary>
-            LBUTTON = 0x01,
+            //LBUTTON = 0x01,
             ///<summary>
             ///Right mouse button
             ///</summary>
-            RBUTTON = 0x02,
+            //RBUTTON = 0x02,
             ///<summary>
             ///Control-break processing
             ///</summary>
-            CANCEL = 0x03,
+            //CANCEL = 0x03,
             ///<summary>
             ///Middle mouse button (three-button mouse)
             ///</summary>
-            MBUTTON = 0x04,
+            //MBUTTON = 0x04,
             ///<summary>
             ///Windows 2000/XP: X1 mouse button
             ///</summary>
-            XBUTTON1 = 0x05,
+            //XBUTTON1 = 0x05,
             ///<summary>
             ///Windows 2000/XP: X2 mouse button
             ///</summary>
-            XBUTTON2 = 0x06,
+            //XBUTTON2 = 0x06,
             ///<summary>
             ///BACKSPACE key
             ///</summary>
@@ -76,15 +128,15 @@ namespace ActionRepeater
             ///<summary>
             ///SHIFT key
             ///</summary>
-            SHIFT = 0x10,
+            //SHIFT = 0x10,
             ///<summary>
             ///CTRL key
             ///</summary>
-            CONTROL = 0x11,
+            //CONTROL = 0x11,
             ///<summary>
             ///ALT key
             ///</summary>
-            MENU = 0x12,
+            //MENU = 0x12,
             ///<summary>
             ///PAUSE key
             ///</summary>
@@ -92,31 +144,31 @@ namespace ActionRepeater
             ///<summary>
             ///CAPS LOCK key
             ///</summary>
-            CAPITAL = 0x14,
+            //CAPITAL = 0x14,
             ///<summary>
             ///Input Method Editor (IME) Kana mode
             ///</summary>
-            KANA = 0x15,
+            //KANA = 0x15,
             ///<summary>
             ///IME Hangul mode
             ///</summary>
-            HANGUL = 0x15,
+            //HANGUL = 0x15,
             ///<summary>
             ///IME Junja mode
             ///</summary>
-            JUNJA = 0x17,
+            //JUNJA = 0x17,
             ///<summary>
             ///IME final mode
             ///</summary>
-            FINAL = 0x18,
+            //FINAL = 0x18,
             ///<summary>
             ///IME Hanja mode
             ///</summary>
-            HANJA = 0x19,
+            //HANJA = 0x19,
             ///<summary>
             ///IME Kanji mode
             ///</summary>
-            KANJI = 0x19,
+            //KANJI = 0x19,
             ///<summary>
             ///ESC key
             ///</summary>
@@ -124,19 +176,19 @@ namespace ActionRepeater
             ///<summary>
             ///IME convert
             ///</summary>
-            CONVERT = 0x1C,
+            //CONVERT = 0x1C,
             ///<summary>
             ///IME nonconvert
             ///</summary>
-            NONCONVERT = 0x1D,
+            //NONCONVERT = 0x1D,
             ///<summary>
             ///IME accept
             ///</summary>
-            ACCEPT = 0x1E,
+            //ACCEPT = 0x1E,
             ///<summary>
             ///IME mode change request
             ///</summary>
-            MODECHANGE = 0x1F,
+            //MODECHANGE = 0x1F,
             ///<summary>
             ///SPACEBAR
             ///</summary>
@@ -144,11 +196,11 @@ namespace ActionRepeater
             ///<summary>
             ///PAGE UP key
             ///</summary>
-            PRIOR = 0x21,
+            PAGEUP = 0x21,
             ///<summary>
             ///PAGE DOWN key
             ///</summary>
-            NEXT = 0x22,
+            PAGEDOWN = 0x22,
             ///<summary>
             ///END key
             ///</summary>
@@ -176,7 +228,7 @@ namespace ActionRepeater
             ///<summary>
             ///SELECT key
             ///</summary>
-            SELECT = 0x29,
+            //SELECT = 0x29,
             ///<summary>
             ///PRINT key
             ///</summary>
@@ -184,11 +236,11 @@ namespace ActionRepeater
             ///<summary>
             ///EXECUTE key
             ///</summary>
-            EXECUTE = 0x2B,
+            //EXECUTE = 0x2B,
             ///<summary>
             ///PRINT SCREEN key
             ///</summary>
-            SNAPSHOT = 0x2C,
+            PRINTSC = 0x2C,
             ///<summary>
             ///INS key
             ///</summary>
@@ -200,7 +252,7 @@ namespace ActionRepeater
             ///<summary>
             ///HELP key
             ///</summary>
-            HELP = 0x2F,
+            //HELP = 0x2F,
             ///<summary>
             ///0 key
             ///</summary>
@@ -244,107 +296,107 @@ namespace ActionRepeater
             ///<summary>
             ///A key
             ///</summary>
-            KEY_A = 0x41,
+            A = 0x41,
             ///<summary>
             ///B key
             ///</summary>
-            KEY_B = 0x42,
+            B = 0x42,
             ///<summary>
             ///C key
             ///</summary>
-            KEY_C = 0x43,
+            C = 0x43,
             ///<summary>
             ///D key
             ///</summary>
-            KEY_D = 0x44,
+            D = 0x44,
             ///<summary>
             ///E key
             ///</summary>
-            KEY_E = 0x45,
+            E = 0x45,
             ///<summary>
             ///F key
             ///</summary>
-            KEY_F = 0x46,
+            F = 0x46,
             ///<summary>
             ///G key
             ///</summary>
-            KEY_G = 0x47,
+            G = 0x47,
             ///<summary>
             ///H key
             ///</summary>
-            KEY_H = 0x48,
+            H = 0x48,
             ///<summary>
             ///I key
             ///</summary>
-            KEY_I = 0x49,
+            I = 0x49,
             ///<summary>
             ///J key
             ///</summary>
-            KEY_J = 0x4A,
+            J = 0x4A,
             ///<summary>
             ///K key
             ///</summary>
-            KEY_K = 0x4B,
+            K = 0x4B,
             ///<summary>
             ///L key
             ///</summary>
-            KEY_L = 0x4C,
+            L = 0x4C,
             ///<summary>
             ///M key
             ///</summary>
-            KEY_M = 0x4D,
+            M = 0x4D,
             ///<summary>
             ///N key
             ///</summary>
-            KEY_N = 0x4E,
+            N = 0x4E,
             ///<summary>
             ///O key
             ///</summary>
-            KEY_O = 0x4F,
+            O = 0x4F,
             ///<summary>
             ///P key
             ///</summary>
-            KEY_P = 0x50,
+            P = 0x50,
             ///<summary>
             ///Q key
             ///</summary>
-            KEY_Q = 0x51,
+            Q = 0x51,
             ///<summary>
             ///R key
             ///</summary>
-            KEY_R = 0x52,
+            R = 0x52,
             ///<summary>
             ///S key
             ///</summary>
-            KEY_S = 0x53,
+            S = 0x53,
             ///<summary>
             ///T key
             ///</summary>
-            KEY_T = 0x54,
+            T = 0x54,
             ///<summary>
             ///U key
             ///</summary>
-            KEY_U = 0x55,
+            U = 0x55,
             ///<summary>
             ///V key
             ///</summary>
-            KEY_V = 0x56,
+            V = 0x56,
             ///<summary>
             ///W key
             ///</summary>
-            KEY_W = 0x57,
+            W = 0x57,
             ///<summary>
             ///X key
             ///</summary>
-            KEY_X = 0x58,
+            X = 0x58,
             ///<summary>
             ///Y key
             ///</summary>
-            KEY_Y = 0x59,
+            Y = 0x59,
             ///<summary>
             ///Z key
             ///</summary>
-            KEY_Z = 0x5A,
+            Z = 0x5A,
             ///<summary>
             ///Left Windows key (Microsoft Natural keyboard) 
             ///</summary>
@@ -360,7 +412,7 @@ namespace ActionRepeater
             ///<summary>
             ///Computer Sleep key
             ///</summary>
-            SLEEP = 0x5F,
+            //SLEEP = 0x5F,
             ///<summary>
             ///Numeric keypad 0 key
             ///</summary>
@@ -725,8 +777,7 @@ namespace ActionRepeater
             OEM_CLEAR = 0xFE
         }
 
-        internal enum ScanCodeShort : short
-        {
+        internal enum ScanCodeShort : short {
             LBUTTON = 0,
             RBUTTON = 0,
             CANCEL = 70,
@@ -903,18 +954,15 @@ namespace ActionRepeater
 
 
         [StructLayout(LayoutKind.Sequential)]
-        struct INPUT
-        {
+        struct INPUT {
             public SendInputEventType type;
             public MouseKeybdhardwareInputUnion mkhi;
-            internal static int Size
-            {
+            internal static int Size {
                 get { return Marshal.SizeOf(typeof(INPUT)); }
             }
         }
         [StructLayout(LayoutKind.Explicit)]
-        struct MouseKeybdhardwareInputUnion
-        {
+        struct MouseKeybdhardwareInputUnion {
             [FieldOffset(0)]
             public MouseInputData mi;
 
@@ -925,8 +973,7 @@ namespace ActionRepeater
             public HARDWAREINPUT hi;
         }
         [StructLayout(LayoutKind.Sequential)]
-        struct KEYBDINPUT
-        {
+        struct KEYBDINPUT {
             public VirtualKeyShort wVk;
             public ScanCodeShort wScan;
             public KEYEVENTF dwFlags;
@@ -934,14 +981,12 @@ namespace ActionRepeater
             public UIntPtr dwExtraInfo;
         }
         [StructLayout(LayoutKind.Sequential)]
-        struct HARDWAREINPUT
-        {
+        struct HARDWAREINPUT {
             public int uMsg;
             public short wParamL;
             public short wParamH;
         }
-        struct MouseInputData
-        {
+        struct MouseInputData {
             public int dx;
             public int dy;
             public uint mouseData;
@@ -950,8 +995,7 @@ namespace ActionRepeater
             public IntPtr dwExtraInfo;
         }
         [Flags]
-        enum MouseEventFlags : uint
-        {
+        enum MouseEventFlags : uint {
             MOUSEEVENTF_MOVE = 0x0001,
             MOUSEEVENTF_LEFTDOWN = 0x0002,
             MOUSEEVENTF_LEFTUP = 0x0004,
@@ -965,21 +1009,19 @@ namespace ActionRepeater
             MOUSEEVENTF_VIRTUALDESK = 0x4000,
             MOUSEEVENTF_ABSOLUTE = 0x8000
         }
-        enum SendInputEventType : int
-        {
+        enum SendInputEventType : int {
             InputMouse,
             InputKeyboard,
             InputHardware
         }
 
-        public static void ClickLeftMouseButton()
-        {
+        public static void ClickLeftMouseButton() {
             INPUT mouseInput = new INPUT();
             mouseInput.type = SendInputEventType.InputMouse;
             mouseInput.mkhi.mi.dx = 0;
             mouseInput.mkhi.mi.dy = 0;
             mouseInput.mkhi.mi.mouseData = 0;
-                
+
             mouseInput.mkhi.mi.dwFlags = MouseEventFlags.MOUSEEVENTF_LEFTDOWN;
             SendInput(1, ref mouseInput, Marshal.SizeOf(new INPUT()));
 
@@ -992,8 +1034,7 @@ namespace ActionRepeater
 
         }
 
-        public static void ClickRightMouseButton()
-        {
+        public static void ClickRightMouseButton() {
             INPUT mouseInput = new INPUT();
             mouseInput.type = SendInputEventType.InputMouse;
             mouseInput.mkhi.mi.dx = 0;
@@ -1012,8 +1053,7 @@ namespace ActionRepeater
 
         }
 
-        public static void SendKey(VirtualKeyShort keycode)
-        {
+        public static void SendKey(VirtualKeyShort keycode) {
             INPUT kbInput = new INPUT();
             kbInput.type = SendInputEventType.InputKeyboard;
             kbInput.mkhi.ki.wVk = keycode;
@@ -1028,7 +1068,7 @@ namespace ActionRepeater
             kbInput.mkhi.ki.dwFlags = KEYEVENTF.KEYUP;
             SendInput(1, ref kbInput, Marshal.SizeOf(new INPUT()));
         }
-        
+
     }
 
 }
