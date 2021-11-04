@@ -24,9 +24,6 @@ namespace ActionRepeater.Forms {
         private int iLastY = 0;
 
         private bool bLinear = false;
-        private bool bWaitDone = false;
-
-        private Point pLastMouse = new Point();
 
         private List<ActionEvent> lEventList = new List<ActionEvent>();
         private List<ActionEvent> lWaits = new List<ActionEvent>();
@@ -93,92 +90,100 @@ namespace ActionRepeater.Forms {
         }
 
         private void MouseRecordEvent(MouseRecord.MouseEvent mEv, int time) {
-            if (mEv.mb == ActionEvent.MouseButton.Wheel) {
+            if (mEv.mb == ActionEvent.MouseButton.Wheel)
+            {
                 iRandAreaSize += (mEv.delta / 120);
 
-                if (mEv.delta % 120 != 0) {
-                    if (mEv.delta > 0) {
+                if (mEv.delta % 120 != 0)
+                {
+                    if (mEv.delta > 0)
+                    {
                         iRandAreaSize += 1;
-                    } else {
+                    }
+                    else
+                    {
                         iRandAreaSize -= 1;
                     }
                 }
                 fHighlight.Size = new Size(iRandAreaSize, iRandAreaSize);
-            } else if (mEv.mb == ActionEvent.MouseButton.ControlWheel) {
+            }
+            else if (mEv.mb == ActionEvent.MouseButton.ControlWheel)
+            {
                 iMouseSpeed += (mEv.delta / 120);
 
-                if (mEv.delta % 120 != 0) {
-                    if (mEv.delta > 0) {
+                if (mEv.delta % 120 != 0)
+                {
+                    if (mEv.delta > 0)
+                    {
                         iMouseSpeed += 1;
-                    } else {
+                    }
+                    else
+                    {
                         iMouseSpeed -= 1;
                     }
                 }
-                if (iMouseSpeed > 30) {
+                if (iMouseSpeed > 30)
+                {
                     iMouseSpeed = 30;
                 }
-                if (iMouseSpeed < 5) {
+                if (iMouseSpeed < 5)
+                {
                     iMouseSpeed = 5;
                 }
                 fLabel.SpeedLabel.Text = "Speed: " + iMouseSpeed;
-            } else if (mEv.mb == ActionEvent.MouseButton.Left || mEv.mb == ActionEvent.MouseButton.Right) {
-                if (iLastEventTime < 0) {
-                    iLastEventTime = time;
-                    iLastX = mEv.x;
-                    iLastY = mEv.y;
-                } else {
-                    int iTime = time - iLastEventTime;
-                    if (iLastX != mEv.x || iLastY != mEv.y) {
-                        int iCurrSpeed = iMouseSpeed;
-                        if(bLinear) {
-                            iCurrSpeed = MouseMover.LinearSpeedForTime(iLastX, iLastY, mEv.x, mEv.y, iTime);
+            }
+            else
+            {
+                int iTime = time - iLastEventTime;
+                if (iLastX != mEv.x || iLastY != mEv.y)
+                {
+                    int iCurrSpeed = iMouseSpeed;
+                    if (bLinear)
+                    {
+                        iCurrSpeed = MouseMover.LinearSpeedForTime(iLastX, iLastY, mEv.x, mEv.y, iTime);
+                        if(iCurrSpeed < 5)
+                        {
+                            iCurrSpeed = 5;
                         }
-                        ActionEvent ev = new ActionEvent(mEv.x, mEv.y, iRandAreaSize, iRandAreaSize, iCurrSpeed, false);
-                        ev.Linear = bLinear;
-                        bWaitDone = false;
-                        EventProc(ev);
-                    } else {
-                        ActionEvent ev = new ActionEvent(iTime);
-                        ev.Linear = bLinear;
-                        EventProc(ev);
+                        iMouseSpeed = iCurrSpeed;
                     }
-                    ActionEvent ev2 = new ActionEvent(mEv.mb);
-                    EventProc(ev2);
-                    iLastEventTime = time;
-                    iLastX = mEv.x;
-                    iLastY = mEv.y;
+
+                    int iTravelTime = MouseMover.TimeForMovement(iLastX, iLastY, mEv.x, mEv.y, iMouseSpeed, bLinear);
+                    int iTotalTime = iTime - iTravelTime;
+                    if(iTotalTime > 0) {
+                        ActionEvent evw = new ActionEvent(iTotalTime);
+                        evw.Linear = bLinear;
+                        EventProc(evw);
+                    }
+                    ActionEvent ev = new ActionEvent(mEv.x, mEv.y, iRandAreaSize, iRandAreaSize, iCurrSpeed, false);
+                    ev.Linear = bLinear;
+                    EventProc(ev);
+                }
+                else
+                {
+                    ActionEvent ev = new ActionEvent(iTime);
+                    ev.Linear = bLinear;
+                    EventProc(ev);
                 }
 
-            } else {
-                if (iLastEventTime < 0) {
-                    iLastEventTime = time;
-                    iLastX = mEv.x;
-                    iLastY = mEv.y;
-                } else {
-                    int iTime = time - iLastEventTime;
-                    if (!bWaitDone) {
-                        bWaitDone = true;
-                        ActionEvent ev = new ActionEvent(iTime);
-                        ev.Linear = bLinear;
-                        EventProc(ev);
-                        iLastEventTime = time;
-                        iLastX = mEv.x;
-                        iLastY = mEv.y;
-                    }
+                if (mEv.mb == ActionEvent.MouseButton.Left || mEv.mb == ActionEvent.MouseButton.Right)
+                {
+                    ActionEvent ev2 = new ActionEvent(mEv.mb);
+                    EventProc(ev2);
                 }
-                
+                iLastEventTime = time;
+                iLastX = mEv.x;
+                iLastY = mEv.y;
             }
 
         }
 
         private void KeyRecordEvent(InputImports.VirtualKeyShort keyPressed, int time) {
-            if (iLastEventTime >= 0) {
-                int iTime = time - iLastEventTime;
-                ActionEvent ev = new ActionEvent(iTime);
-                ev.Linear = bLinear;
-                EventProc(ev);
-                iLastEventTime = time;
-            }
+            int iTime = time - iLastEventTime;
+            ActionEvent ev = new ActionEvent(iTime);
+            ev.Linear = bLinear;
+            EventProc(ev);
+            iLastEventTime = time;
             ActionEvent ev2 = new ActionEvent(keyPressed);
             EventProc(ev2);
             iLastEventTime = time;

@@ -13,11 +13,12 @@ namespace ActionRepeater {
         }
 
         public enum MouseButton {
+            None = 0x00,
             Left = 0x0201,
             Right = 0x0204,
             Wheel = 0x020A,
             ControlWheel = 0x020B,
-            Move = 0x00
+            Move = 0x200
         }
 
         private EventTypes eventType;
