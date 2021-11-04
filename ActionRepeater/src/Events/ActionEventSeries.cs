@@ -80,10 +80,8 @@ namespace ActionRepeater {
             for (int i = 0; i < iNumLoops; i++) {
                 foreach (ActionEvent ev in loop) {
                     ev.ProcessEvent();
-                    Console.WriteLine("" + st.ElapsedMilliseconds);
                     st.Restart();
                 }
-                Console.WriteLine("");
             }
             st.Stop();
             foreach (ActionEvent ev in after) {

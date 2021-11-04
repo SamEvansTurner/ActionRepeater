@@ -111,6 +111,7 @@ namespace ActionRepeater.Forms
             this.Font = new System.Drawing.Font("Calibri", 10F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "frmRecord";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Record Actions";
             this.ResumeLayout(false);
 

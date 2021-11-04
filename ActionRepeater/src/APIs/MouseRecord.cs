@@ -79,6 +79,7 @@ namespace ActionRepeater {
                     MouseEvent mEv = new MouseEvent(hookStruct.pt.x, hookStruct.pt.y, (ActionEvent.MouseButton)wParam);
                     callback?.Invoke(mEv, hookStruct.time);
                     mbEvents.Add(mEv);
+                    stopwatch.Restart();
                 } else if (wParam == (IntPtr)ActionEvent.MouseButton.Wheel) {
                     InputImports.MSLLHOOKSTRUCT hookStruct = (InputImports.MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(InputImports.MSLLHOOKSTRUCT));
                     int zDelta = (int)(hookStruct.mouseData & (0xFFFF0000)) >> 16;
@@ -93,8 +94,8 @@ namespace ActionRepeater {
                     MouseEvent mEv = new MouseEvent(hookStruct.pt.x, hookStruct.pt.y, ActionEvent.MouseButton.Move);
                     callback?.Invoke(mEv, hookStruct.time);
                     mbEvents.Add(mEv);
+                    stopwatch.Restart();
                 }
-                stopwatch.Restart();
             }
 
 

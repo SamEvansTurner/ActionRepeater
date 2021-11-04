@@ -484,6 +484,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "frmAddEvent";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Add New Event";
             ((System.ComponentModel.ISupportInitialize)(this.numWaitMS)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMouseX)).EndInit();

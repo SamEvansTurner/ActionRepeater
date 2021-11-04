@@ -145,11 +145,9 @@ namespace ActionRepeater {
             double velX = Math.Round((diffX / distance) * speedOffset);
             double velY = Math.Round((diffY / distance) * speedOffset);
             double distPerStep = Hypot(velX, velY);
-            Console.WriteLine(xs + "," + ys + " | " + diffX + "," + diffY + " | " + velX + "," + velY + " -||- " + distance);
             while (distance > distPerStep) {
                 int nextX = (int) Math.Round(xs + velX);
                 int nextY = (int) Math.Round(ys + velY);
-                Console.WriteLine(xs + "," + ys + " | " + diffX + "," + diffY + " | " + velX + "," + velY + " -||- " + distance);
                 SetCursorPos(nextX, nextY);
                 xs = Cursor.Position.X;
                 ys = Cursor.Position.Y;
@@ -158,7 +156,6 @@ namespace ActionRepeater {
                 velX = (int)Math.Round((diffX / distance) * speedOffset);
                 velY = (int)Math.Round((diffY / distance) * speedOffset);
                 distance = Hypot((double)diffX, (double)diffY);
-                Console.WriteLine(xs + "," + ys + " | " + diffX + "," + diffY + " | " + velX + "," + velY + " -||- " + distance);
                 Thread.Sleep(stepSleep);
 
             }
@@ -177,6 +174,21 @@ namespace ActionRepeater {
 
         }
 
+        public static int TimeForMovement(int sx, int sy, int destX, int destY, int iMouseSpeed, bool bLinear)
+        {
+            int diffX = destX - sx;
+            int diffY = destY - sy;
+            double distance = Hypot(diffX, diffY);
+            double dTravelTimePerPix = 0;
+            if (!bLinear) {
+                dTravelTimePerPix = -1.5135 + (44.461 / iMouseSpeed);
+            } else {
+                dTravelTimePerPix = iMouseSpeed / pixPerSpeed;
+            }
+
+            return (int)Math.Round(dTravelTimePerPix * distance);
+        }
+            
         static double Hypot(double dx, double dy) {
             return Math.Sqrt(dx * dx + dy * dy);
         }
