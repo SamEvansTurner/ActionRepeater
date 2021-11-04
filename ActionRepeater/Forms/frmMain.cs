@@ -199,6 +199,8 @@ namespace ActionRepeater {
             ActionEventSeries.LoadFromFile(ofdMain.FileName);
 
             ReloadEvents();
+
+            ActionEventSeries.GetInstance().FinishedCallback = LoopCallback;
         }
 
         private void btnPlay_Click(object sender, EventArgs e) {
