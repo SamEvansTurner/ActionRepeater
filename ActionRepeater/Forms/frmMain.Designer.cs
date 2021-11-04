@@ -55,6 +55,8 @@
             this.btnLoad = new System.Windows.Forms.PictureBox();
             this.btnSave = new System.Windows.Forms.PictureBox();
             this.btnPlay = new System.Windows.Forms.PictureBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.numRemaining = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.numLoops)).BeginInit();
             this.tabPages.SuspendLayout();
             this.tabBefore.SuspendLayout();
@@ -64,6 +66,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.btnLoad)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnSave)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnPlay)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numRemaining)).BeginInit();
             this.SuspendLayout();
             // 
             // btnAddNewEvent
@@ -114,7 +117,7 @@
             // 
             this.lblRepeats.AutoSize = true;
             this.lblRepeats.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblRepeats.Location = new System.Drawing.Point(160, 30);
+            this.lblRepeats.Location = new System.Drawing.Point(160, 15);
             this.lblRepeats.Name = "lblRepeats";
             this.lblRepeats.Size = new System.Drawing.Size(57, 20);
             this.lblRepeats.TabIndex = 10;
@@ -123,7 +126,7 @@
             // numLoops
             // 
             this.numLoops.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numLoops.Location = new System.Drawing.Point(235, 27);
+            this.numLoops.Location = new System.Drawing.Point(258, 12);
             this.numLoops.Maximum = new decimal(new int[] {
             8000,
             0,
@@ -135,7 +138,7 @@
             0,
             0});
             this.numLoops.Name = "numLoops";
-            this.numLoops.Size = new System.Drawing.Size(140, 26);
+            this.numLoops.Size = new System.Drawing.Size(117, 26);
             this.numLoops.TabIndex = 11;
             this.numLoops.Value = new decimal(new int[] {
             1,
@@ -354,11 +357,42 @@
             this.btnPlay.TabStop = false;
             this.btnPlay.Click += new System.EventHandler(this.btnPlay_Click);
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(160, 47);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(89, 20);
+            this.label4.TabIndex = 17;
+            this.label4.Text = "Loops Left:";
+            // 
+            // numRemaining
+            // 
+            this.numRemaining.Enabled = false;
+            this.numRemaining.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.numRemaining.Location = new System.Drawing.Point(258, 45);
+            this.numRemaining.Maximum = new decimal(new int[] {
+            8000,
+            0,
+            0,
+            0});
+            this.numRemaining.Name = "numRemaining";
+            this.numRemaining.Size = new System.Drawing.Size(117, 26);
+            this.numRemaining.TabIndex = 18;
+            this.numRemaining.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(536, 760);
+            this.Controls.Add(this.numRemaining);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.btnEdit);
             this.Controls.Add(this.btnRecord);
             this.Controls.Add(this.tabPages);
@@ -385,6 +419,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.btnLoad)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnSave)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnPlay)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numRemaining)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -417,6 +452,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btnEdit;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.NumericUpDown numRemaining;
     }
 }
 

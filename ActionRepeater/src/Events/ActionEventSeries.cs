@@ -8,6 +8,14 @@ namespace ActionRepeater {
     [XmlRoot("ActionEventSeries")]
     public class ActionEventSeries {
 
+        public delegate void LoopFinished();
+        private LoopFinished loopFinishedCallback;
+        [XmlIgnore]
+        public LoopFinished FinishedCallback {
+            get { return loopFinishedCallback; }
+            set { loopFinishedCallback = value; }
+        }
+
         private static ActionEventSeries instance;
 
         private List<ActionEvent> before = new List<ActionEvent>();
@@ -82,6 +90,7 @@ namespace ActionRepeater {
                     ev.ProcessEvent();
                     st.Restart();
                 }
+                loopFinishedCallback?.Invoke();
             }
             st.Stop();
             foreach (ActionEvent ev in after) {
