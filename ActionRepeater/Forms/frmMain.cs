@@ -29,8 +29,16 @@ namespace ActionRepeater {
             keyHook.RegisterHotKey(ActionRepeater.ModifierKeys.None, Keys.F5);
             this.Icon = Properties.Resources.ActionRepeater;
             tabPages.SelectedTab = tabPages.TabPages["tabLoop"];
+            ActionEventSeries.GetInstance().FinishedCallback = LoopCallback;
         }
 
+        private void LoopCallback() {
+            LoopEnd LoopEndActions = new LoopEnd(DecreaseRemaining);
+            this.BeginInvoke(LoopEndActions, null);
+        }
+        private void DecreaseRemaining() {
+            numRemaining.Value = Math.Max(0, numRemaining.Value - 1);
+        }
 
         private void ReloadEvents() {
             for (int i = 0; i < tabPages.TabPages.Count; i++) {
@@ -83,7 +91,6 @@ namespace ActionRepeater {
                 listEvents.Items.Clear();
                 listEvents.Focus();
                 EnableButtons(false);
-
             }
         }
 
@@ -214,6 +221,7 @@ namespace ActionRepeater {
                     tPlayback.Abort();
                     tPlayback = null;
                 }
+                numRemaining.Value = numLoops.Value;
                 tPlayback = new Thread(() => PlayActions());
                 tPlayback.Start();
             } else {
@@ -256,6 +264,7 @@ namespace ActionRepeater {
 
         private void numLoops_ValueChanged(object sender, EventArgs e) {
             ActionEventSeries.GetInstance().Loops = (int)numLoops.Value;
+            numRemaining.Value = numLoops.Value;
         }
 
         private void btnRecord_Click(object sender, EventArgs e) {
